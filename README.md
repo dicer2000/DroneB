@@ -1,6 +1,6 @@
 # DroneB
 #### ©2022. Brett Huffman
-#### v.01
+#### v.02
 ---------------------------------------
 
 The DroneB project is meant to act as a starting point for Tello Drone programming in the Intro to Programming course at Principia College.

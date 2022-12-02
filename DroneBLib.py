@@ -1,7 +1,7 @@
 '''
 DroneBLib - Tello Drone Starter Library
 (c)2022. Brett Huffman
-v.01
+v.02
 ---------------------------------------
 Drone Controls
 tab - lift off
@@ -117,6 +117,7 @@ class DroneB(object):
         self.drone = tellopy.Tello()
         self.wid = None
         self.show_hud = True
+        self.video_format = 1 # 16 x 9 by default
         self.hud_font = None
         self.hud_color = (255,255,255)
         self.out_file = None
@@ -127,15 +128,28 @@ class DroneB(object):
 
     def init_drone(self):
         """Connect, uneable streaming and subscribe to events"""
-
+        
+        # Check for errors -- often caused by not
+        # having the drone connected.
         self.drone.connect()
-        self.drone.wait_for_connection(60.0)
+
+        try:
+            self.drone.wait_for_connection(15.0)
+        except:
+            print("\nConnection To Drone Failed!\n")
+            exiting.set(True)   # Shut down correctly
+            self.drone.quit()
+            exit(0)
+        # No error continue starting up
         self.drone.start_video()
         # container for processing the packets into frames
         self.container = av.open(self.drone.get_video_stream())
         self.vid_stream = self.container.streams.video[0]
         # Subscribe for receiving data
         self.drone.subscribe(self.drone.EVENT_FLIGHT_DATA, self.flight_data_handler)
+        # Set the camera
+        self.drone.set_video_mode(self.video_format)
+
 
     def init_window(self):
         pygame.init()
@@ -170,6 +184,7 @@ class DroneB(object):
             'backspace': lambda drone, speed: drone.land(),
             'h': self.toggle_hud,
             'p': self.palm_land,
+            'v': self.toggle_video,
     #        'r': toggle_recording,
     #        'z': toggle_zoom,
     #        'enter': take_picture,
@@ -212,6 +227,9 @@ class DroneB(object):
 
         # Show video via Pygame window
         background = pygame.display.get_surface()
+        color = (0,0,0) # Black background
+        background.fill(color)
+
         # Get where to center video
         x = (background.get_width() - pg_image.get_width())/2
         y = (background.get_height() - pg_image.get_height())/2
@@ -264,7 +282,9 @@ class DroneB(object):
     # ALT:0|SPD:0|BAT:12|WIFI:0|CAM:0|MODE:6
     hud = [
         ['ALT', 'ALT {0}', ''],
-        ['SPD', 'SPD {0}', ''],
+        ['north_speed', 'FWD SPD {0}', ''],
+        ['east_speed', 'L/R SPD {0}', ''],
+        ['SPD', 'U/D SPD {0}', ''],
         ['BAT', 'BAT {0}%', ''],
         ['WIFI', 'NET {0}%', '']
     ]
@@ -272,7 +292,14 @@ class DroneB(object):
     def flight_data_handler(self, event, sender, data):
         '''Receives data from drone and formats for HUD'''
         strData = str(data).replace(" ", "")
+        if self.prev_flight_data != strData:
+            self.prev_flight_data = strData
+        else:
+            return
         hud_items = dict(x.split(":") for x in str(strData).split("|"))
+        # Add special items
+        hud_items["east_speed"] = data.east_speed
+        hud_items["north_speed"] = data.north_speed
         i = 0
         for item_val, fmt_str, val3 in (self.hud):
             val = hud_items[item_val]
@@ -302,3 +329,11 @@ class DroneB(object):
         if speed == 0:
             return
         self.show_hud = not self.show_hud
+
+
+    def toggle_video(self, drone, speed):
+        if speed == 0:
+            return
+        # Flip between 1 and 0 (like v = !v in better languages)
+        self.video_format = 1 - self.video_format
+        self.drone.set_video_mode(self.video_format)

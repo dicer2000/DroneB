@@ -5,7 +5,7 @@ required, just instantiate an DroneB object,
 call the start() method, and go
 
 (c)2022. Brett Huffman
-v.01
+v.02
 ---------------------------------------
 '''
 from DroneBLib import DroneB

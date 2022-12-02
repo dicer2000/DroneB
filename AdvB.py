@@ -7,7 +7,7 @@ handles keystrokes, displaying video and
 sending commands to the drone.
 
 (c)2022. Brett Huffman
-v.01
+v.02
 ---------------------------------------
 '''
 from DroneBLib import DroneB
