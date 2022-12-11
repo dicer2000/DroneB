@@ -19,7 +19,7 @@ https://github.com/hanyazou/TelloPy
 ---------------------------------------
 '''
 import time
-import datetime
+from datetime import datetime, timedelta
 import os
 import cv2
 import tellopy
@@ -31,12 +31,14 @@ import pygame.key
 import pygame.locals
 import pygame.font
 import copy
-import threading #Python library that allows you to create multiple threads to run multiple functions at the same time
+from threading import Event, Thread, Lock
+from collections import deque
+#Python library that allows you to create multiple threads to run multiple functions at the same time
 
 # Thread-safe global objects
 class SafeFrame(object):
     def __init__(self, startval = None):
-        self.lock = threading.Lock()
+        self.lock = Lock()
         self.value = startval
     def set(self, val):
         self.lock.acquire(True, 0.1)
@@ -52,7 +54,7 @@ class SafeFrame(object):
             self.lock.release()
 class SafeExiting(object):
     def __init__(self, startval = False):
-        self.lock = threading.Lock()
+        self.lock = Lock()
         self.value = startval
     def set(self, exiting):
         with self.lock:
@@ -92,9 +94,10 @@ class DroneB(object):
         # Start everything
         self.init_drone()
         self.init_controls()
+        self.init_process_queue_items()
         self.init_window()
 
-        threading.Thread(target=self.frame_grab, args=[self]).start() #Create a thread that runs the function frame_grab while main runs in the current thread
+        Thread(target=self.frame_grab, args=[self]).start() #Create a thread that runs the function frame_grab while main runs in the current thread
         
         if custom_loop == False:
             while exiting.get() == False:
@@ -125,6 +128,9 @@ class DroneB(object):
         self.out_stream_writer = None
         self.out_name = None
         self.start_time = time.time()
+        self.command_queue = deque()
+        self.command_queue_enable = False
+        self.command_queue_timeout = None
 
     def init_drone(self):
         """Connect, uneable streaming and subscribe to events"""
@@ -185,6 +191,7 @@ class DroneB(object):
             'h': self.toggle_hud,
             'p': self.palm_land,
             'v': self.toggle_video,
+            'c': self.toggle_command_queue,
     #        'r': toggle_recording,
     #        'z': toggle_zoom,
     #        'enter': take_picture,
@@ -337,3 +344,64 @@ class DroneB(object):
         # Flip between 1 and 0 (like v = !v in better languages)
         self.video_format = 1 - self.video_format
         self.drone.set_video_mode(self.video_format)
+
+    def toggle_command_queue(self, drone, speed):
+        # Enable processing items off the queue
+        if speed == 0:
+            return
+        self.command_queue_enable = 1 - self.command_queue_enable
+
+
+    # Maps Commands to Keystrokes
+    def init_process_queue_items(self):
+        # Keyboard map - Key => Action
+        # Action can be a string or method
+        self.queue_items = {
+            'forward': pygame.K_w,
+            'backward': pygame.K_s,
+            'left': pygame.K_a,
+            'right': pygame.K_d,
+            'yaw_left': pygame.K_q,
+            'yaw_right': pygame.K_e,
+            'up': pygame.K_UP,
+            'down': pygame.K_DOWN,
+            'takeoff': pygame.K_TAB,
+            'land': pygame.K_BACKSPACE,
+        }
+
+    def process_command_queue(self):
+        if not self.command_queue_enable:
+            self.command_queue_timeout = None
+            return
+
+        # Has time expired with a running queue item?
+        if not self.command_queue_timeout == None:
+            if self.command_queue_timeout < datetime.today():
+                # Current item has expired
+                self.command_queue_timeout = None
+                new_item = self.command_queue[0]
+                pygame.event.post(pygame.event.Event(pygame.KEYUP, key=new_item.process))
+
+                self.command_queue.popleft()
+            else:
+                # Continue processing item
+
+                return
+
+        # Process the command queue if an item is available
+        if len(self.command_queue) > 0:
+            # Keep the item on the queue until done
+            # processing with a simple peek
+            new_item = self.command_queue[0]
+
+            # Process new item
+            pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=new_item.process))
+
+            # Set New timeout
+            dt = datetime.today()
+            self.command_queue_timeout = dt + timedelta(milliseconds=new_item.process_time)
+
+class Queue_Item():
+    def __init__(self, process, process_time, arg1 = None, arg2 = None):
+        self.process = process
+        self.process_time = process_time
