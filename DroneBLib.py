@@ -132,6 +132,7 @@ class DroneB(object):
         self.command_queue = deque()
         self.command_queue_enable = False
         self.command_queue_timeout = None
+        self.command_queue_active = True
 
     def init_drone(self):
         """Connect, uneable streaming and subscribe to events"""
@@ -411,6 +412,7 @@ class DroneB(object):
                 # Current item has expired
                 self.command_queue_timeout = None
                 new_item = self.command_queue[0]
+                self.command_queue_active = False
                 pygame.event.post(pygame.event.Event(pygame.KEYUP, key=new_item.process))
 
                 self.command_queue.popleft()
@@ -426,6 +428,7 @@ class DroneB(object):
             new_item = self.command_queue[0]
 
             # Process new item
+            self.command_queue_active = True
             pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=new_item.process))
 
             # Set New timeout
