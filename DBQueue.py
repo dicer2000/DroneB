@@ -16,15 +16,13 @@ def main():
 
 
     # Fill command queue with items to process
-    db.command_queue.append(Queue_Item(db.queue_items["takeoff"], 2000))
-    db.command_queue.append(Queue_Item(db.queue_items["left"], 500))
-    db.command_queue.append(Queue_Item(db.queue_items["forward"], 500))
-    db.command_queue.append(Queue_Item(db.queue_items["right"], 500))
-    db.command_queue.append(Queue_Item(db.queue_items["forward"], 500))
-    db.command_queue.append(Queue_Item(db.queue_items["yaw_left"], 2000))
-    db.command_queue.append(Queue_Item(db.queue_items["forward"], 500))
-    db.command_queue.append(Queue_Item(db.queue_items["yaw_left"], 2000))
-    db.command_queue.append(Queue_Item(db.queue_items["forward"], 500))
+    db.AddNewQueueItem("takeoff", 2000)
+    for i in range(12):
+        db.AddNewQueueItem("yaw_left", 500)
+        db.AddNewQueueItem("forward", 600)
+    db.AddNewQueueItem("land", 1000)
+
+
 
     # The start of this loop should be exactly as it's shown below. Any changes and it might not work
     # as expected. Use the CV image however you want to analyze drone video and call drone functions 
@@ -35,7 +33,8 @@ def main():
         if lcurrent_frame != None:
             image = db.process_frame(lcurrent_frame) # Process
 
-
+        # Once the command queue is enabled, process them
+        # one-by-one until it's empty
         db.process_command_queue() # Process the command queue
 
 if __name__ == '__main__':

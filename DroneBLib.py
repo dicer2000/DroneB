@@ -120,7 +120,8 @@ class DroneB(object):
         self.drone = tellopy.Tello()
         self.wid = None
         self.show_hud = True
-        self.video_format = 1 # 16 x 9 by default
+        self.video_format = 0 # 4 x 3 by default
+        self.down_camera = 0 # Dont show downward camera
         self.hud_font = None
         self.hud_color = (255,255,255)
         self.out_file = None
@@ -148,13 +149,31 @@ class DroneB(object):
             exit(0)
         # No error continue starting up
         self.drone.start_video()
-        # container for processing the packets into frames
-        self.container = av.open(self.drone.get_video_stream())
+        
+        
+        # Try 3 times before failing
+        i = 3
+        while 1 == 1:
+            try:
+                # container for processing the packets into frames
+                self.container = av.open(self.drone.get_video_stream())
+                break # No error!  keep going
+            except:
+                i -= 1
+                if i < 1:
+                    print("\nDrone Video Failed!\n")
+                    exiting.set(True)   # Shut down correctly
+                    self.drone.quit()
+                    exit(0)
+                time.sleep(0.1)
+
         self.vid_stream = self.container.streams.video[0]
         # Subscribe for receiving data
         self.drone.subscribe(self.drone.EVENT_FLIGHT_DATA, self.flight_data_handler)
         # Set the camera
         self.drone.set_video_mode(self.video_format)
+        cmd = 'downvision {}'.format(self.down_camera)
+        self.drone.sock.sendto(bytes(cmd, 'utf-8'), self.drone.tello_addr)
 
 
     def init_window(self):
@@ -192,6 +211,7 @@ class DroneB(object):
             'p': self.palm_land,
             'v': self.toggle_video,
             'c': self.toggle_command_queue,
+            'x': self.toggle_downcamera,
     #        'r': toggle_recording,
     #        'z': toggle_zoom,
     #        'enter': take_picture,
@@ -229,6 +249,10 @@ class DroneB(object):
         """convert frame to cv2 image and show"""
         image = cv2.cvtColor(numpy.array(
             frame), cv2.COLOR_RGB2BGR)
+
+        # Rotate if its a from the down_camera
+        if(self.down_camera == 1):
+            image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
 
         pg_image = pygame.image.frombuffer(image.tostring(), image.shape[1::-1], "BGR")
 
@@ -345,6 +369,13 @@ class DroneB(object):
         self.video_format = 1 - self.video_format
         self.drone.set_video_mode(self.video_format)
 
+    def toggle_downcamera(self, drone, speed):
+        if speed == 0:
+            return
+        self.down_camera = 1 - self.down_camera
+        cmd = 'downvision {}'.format(self.down_camera)
+        self.drone.sock.sendto(bytes(cmd, 'utf-8'), self.drone.tello_addr)
+
     def toggle_command_queue(self, drone, speed):
         # Enable processing items off the queue
         if speed == 0:
@@ -361,8 +392,8 @@ class DroneB(object):
             'backward': pygame.K_s,
             'left': pygame.K_a,
             'right': pygame.K_d,
-            'yaw_left': pygame.K_q,
-            'yaw_right': pygame.K_e,
+            'yaw_left': pygame.K_LEFT,
+            'yaw_right': pygame.K_RIGHT,
             'up': pygame.K_UP,
             'down': pygame.K_DOWN,
             'takeoff': pygame.K_TAB,
@@ -400,6 +431,12 @@ class DroneB(object):
             # Set New timeout
             dt = datetime.today()
             self.command_queue_timeout = dt + timedelta(milliseconds=new_item.process_time)
+
+    def AddNewQueueItem(self, process, process_time_in_miliseconds = 500):
+        ''' Method to add new items to the queue '''
+        if process != None and process_time_in_miliseconds != None and process in self.queue_items:
+            self.command_queue.append(Queue_Item(self.queue_items[process], process_time_in_miliseconds))
+
 
 class Queue_Item():
     def __init__(self, process, process_time, arg1 = None, arg2 = None):
