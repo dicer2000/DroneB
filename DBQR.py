@@ -1,19 +1,15 @@
 '''
-AdvB - The more complicated example of using
-the Tello Drone Starter Library.  You must 
-specify custom_loop = True in the start()
-command.  Next, make sure to then loop which
-handles keystrokes, displaying video and
-sending commands to the drone.
+DBQR.py - reads qr codes and prints to the
+text to the screen
 
 (c)2022. Brett Huffman
 v.02
 ---------------------------------------
 '''
-from DroneBLib import DroneB
-from DroneBLib import exiting, current_frame
+from libs.DroneBLib import DroneB
+from libs.DroneBLib import exiting, current_frame
 import cv2
-from QR import read_qr_code
+from libs.QR import read_qr_code
 
 def main():
     db = DroneB()

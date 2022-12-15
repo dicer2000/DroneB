@@ -35,7 +35,7 @@ ie:
 
     pip3 install cv2
 
-## Execution
+## Execution Demo Programs
 Execute the programs with the following:
 
     python <script>
@@ -43,6 +43,20 @@ Execute the programs with the following:
 ie
 
     python ./BasicB.py
+
+## Using Libraries Yourself
+Place the DroneBLib.py file into your project and include the module in 
+your python script.  Include the entire module and create a DroneB object 
+to control the drone:
+
+    from DroneBLib import DroneB
+
+    def main():
+        db = DroneB()
+        db.start()
+
+    if __name__ == '__main__':
+        main()
 
 ## Credits
 Credit goes to the work by Hanyazou for many of the ideas in these modules:

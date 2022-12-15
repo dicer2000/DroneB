@@ -10,8 +10,8 @@ sending commands to the drone.
 v.02
 ---------------------------------------
 '''
-from DroneBLib import DroneB
-from DroneBLib import exiting, current_frame
+from libs.DroneBLib import DroneB
+from libs.DroneBLib import exiting, current_frame
 import cv2
 
 def main():

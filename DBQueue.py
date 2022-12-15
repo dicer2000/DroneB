@@ -1,13 +1,14 @@
 '''
 DBQueue - Demonstrates queuing items for
-the drone to process
+the drone to process.  Press 'C' to start/stop
+processing items in the queue.
 
 (c)2022. Brett Huffman
 v.02
 ---------------------------------------
 '''
-from DroneBLib import DroneB, Queue_Item
-from DroneBLib import exiting, current_frame
+from libs.DroneBLib import DroneB, Queue_Item
+from libs.DroneBLib import exiting, current_frame
 import cv2
 
 def main():

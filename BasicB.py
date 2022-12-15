@@ -8,7 +8,7 @@ call the start() method, and go
 v.02
 ---------------------------------------
 '''
-from DroneBLib import DroneB
+from libs.DroneBLib import DroneB
 
 def main():
     db = DroneB()

@@ -1,12 +1,14 @@
 '''
-DBTrack.py - Track blue square
+DBTrack.py - Track blue squares with queues.  Once
+user presses 'C', the drone will automatically
+track a blue square (use blue tape on the wall to demo).
 
 (c)2022. Brett Huffman
 v.02
 ---------------------------------------
 '''
-from DroneBLib import DroneB
-from DroneBLib import exiting, current_frame
+from libs.DroneBLib import DroneB
+from libs.DroneBLib import exiting, current_frame
 import cv2
 import numpy as np
 import imutils

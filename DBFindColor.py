@@ -1,12 +1,16 @@
 '''
-DBFace1.py
+DBFindColor.py - Allows user to find the color
+that can be used for range tracking.  Use:
+7,u,j,m - To adjust Hue
+8,i,k,, - to adjust Saturation
+9,o,l,. - to adjust Value
 
 (c)2022. Brett Huffman
 v.02
 ---------------------------------------
 '''
-from DroneBLib import DroneB
-from DroneBLib import exiting, current_frame
+from libs.DroneBLib import DroneB
+from libs.DroneBLib import exiting, current_frame
 import cv2
 import numpy as np
 import imutils
