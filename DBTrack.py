@@ -26,7 +26,7 @@ def main():
     
     # Set range for green color and 
     # define mask
-    higher_hsv = np.array([180,248,130], np.uint8) #(131, 67, 18)  #BGR
+    higher_hsv = np.array([180,255,130], np.uint8) #(131, 67, 18)  #BGR
     lower_hsv = np.array([52,94,30], np.uint8) #(255, 255, 130) #BGR
     kernel = np.ones((5, 5), "uint8")
 
@@ -36,6 +36,9 @@ def main():
     # to move drone as desired.
     while exiting.get() == False: # Loop until exiting is signaled
         db.process_keyboard()  # Process keystrokes
+        # Once the command queue is enabled, process them
+        # one-by-one until it's empty
+        db.process_command_queue() # Process the command queue
         lcurrent_frame = current_frame.get() # Get video frame
         if lcurrent_frame != None:
             image = db.process_frame(lcurrent_frame) # Process
@@ -71,8 +74,8 @@ def main():
 #                mask2 = cv2.cvtColor(hsv.copy(), cv2.COLOR_BGR2GRAY)
 
                 # reduce the noise
-                opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-                contours, _ = cv2.findContours(opening, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                mask2 = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+                contours, _ = cv2.findContours(mask2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 #                contours = imutils.grab_contours(contours)
 #                contours = contours[0]
                 # Get dimensions of everything
@@ -128,21 +131,21 @@ def main():
                     # Do a little proportion here
                     # 40 pixels   =   diff
                     #  3 seconds      X
-                    prop_x_to_move = 100 * (image_mid[0] - obj_mid[0])//40
-                    prop_y_to_move = 100 * (image_mid[1] - obj_mid[1])//40
+                    prop_x_to_move = int(10 * (image_mid[0] - obj_mid[0])//40)
+                    prop_y_to_move = int(10 * (image_mid[1] - obj_mid[1])//40)
 
                     if db.command_queue_active == True and db.command_queue_enable == True:
-                        if prop_x_to_move > 0:
+                        if prop_x_to_move > 5:
                             print("Sent left", abs(prop_x_to_move))
                             db.AddNewQueueItem("left", abs(prop_x_to_move))
-                        else:
+                        elif prop_x_to_move < -5:
                             print("Sent right", abs(prop_x_to_move))
                             db.AddNewQueueItem("right", abs(prop_x_to_move))
 
-                        if prop_y_to_move > 0:
+                        if prop_y_to_move > 5:
                             print("Sent up", abs(prop_x_to_move))
                             db.AddNewQueueItem("up", abs(prop_x_to_move))
-                        else:
+                        elif prop_y_to_move < -5:
                             print("Sent down", abs(prop_x_to_move))
                             db.AddNewQueueItem("down", abs(prop_x_to_move))
 

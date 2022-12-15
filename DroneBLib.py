@@ -381,7 +381,7 @@ class DroneB(object):
         # Enable processing items off the queue
         if speed == 0:
             return
-        self.command_queue_enable = 1 - self.command_queue_enable
+        self.command_queue_enable = not self.command_queue_enable
 
 
     # Maps Commands to Keystrokes

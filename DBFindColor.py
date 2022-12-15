@@ -13,7 +13,7 @@ import imutils
 
 ihighH = 180
 ilowH = 52
-ihighS = 200
+ihighS = 255
 ilowS = 94
 ihighV = 130
 ilowV = 30

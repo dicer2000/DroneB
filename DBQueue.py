@@ -19,7 +19,8 @@ def main():
     db.AddNewQueueItem("takeoff", 2000)
     for i in range(12):
         db.AddNewQueueItem("yaw_left", 500)
-        db.AddNewQueueItem("forward", 600)
+        db.AddNewQueueItem("right", 500)
+        db.AddNewQueueItem("forward", 300)
     db.AddNewQueueItem("land", 1000)
 
 
