@@ -14,7 +14,7 @@ def read_qr_code(image):
     
     try:
         detect = cv2.QRCodeDetector()
-        value, points, straight_qrcode = detect.detectAndDecode(image)
-        return value
+        value, points, _ = detect.detectAndDecode(image)
+        return (value, points)
     except:
         return None

@@ -35,11 +35,11 @@ def main():
             loop_count += 1
             if loop_count % 30 == 0:
                 # Look for QR - if read put text on screen
-                strVal = read_qr_code(image=image)
+                val = read_qr_code(image=image)
 
 
-                cv2.putText(image, strVal, (2, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-
+                cv2.putText(image, val[0], (2, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+                cv2.rectangle(image, val[0][0], val[0][4], (0, 255, 0), 3)
                 # CV way of showing video
                 cv2.imshow('Secondary View', image)
                 _ = cv2.waitKey(1) & 0xFF

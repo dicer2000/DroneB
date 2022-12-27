@@ -13,6 +13,8 @@ backspace - land
 P - palm-land
 Enter - take picture
 R - toggle recording
+C - toggle command queue on/off
+X - toggle forward / downward cam
 
 Based on work from Hanyazou
 https://github.com/hanyazou/TelloPy
@@ -20,7 +22,6 @@ https://github.com/hanyazou/TelloPy
 '''
 import time
 from datetime import datetime, timedelta
-import os
 import cv2
 import tellopy
 import av
@@ -247,9 +248,8 @@ class DroneB(object):
                         key_handler(self.drone, 0)
 
     def process_frame(self, frame):
-        """convert frame to cv2 image and show"""
-        image = cv2.cvtColor(numpy.array(
-            frame), cv2.COLOR_RGB2BGR)
+        # convert frame to cv2 image and show
+        image = cv2.cvtColor(numpy.array(frame), cv2.COLOR_RGB2BGR)
 
         # Rotate if its a from the down_camera
         if(self.down_camera == 1):
