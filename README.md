@@ -21,11 +21,12 @@ There are several python files available for use:
 ## Installation
 To use this library, you must include the following with the pip3 command:
 
-- cv2
+- opencv-python
 - tellopy
 - av
 - numpy
 - pygame
+- image
 
 Install these libraries with the command:
 
@@ -33,7 +34,7 @@ Install these libraries with the command:
 
 ie:
 
-    pip3 install cv2
+    pip3 install opencv-python
 
 ## Execution Demo Programs
 Execute the programs with the following:
