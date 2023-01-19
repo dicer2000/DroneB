@@ -113,7 +113,7 @@ def main():
 
                 ''' Determine how much to move
                 The axes are shown below (assuming a frame width and height of 600x400):
-                +y                 (0,200)
+                +Y                 (0,200)
 
                 Y  (-300, 0)        (0,0)               (300,0)
 

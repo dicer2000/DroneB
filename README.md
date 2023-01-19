@@ -59,6 +59,21 @@ to control the drone:
     if __name__ == '__main__':
         main()
 
+## Drone Controls
+Out of the box, the following key controls are available for operating the drone.
+
+Tab - lift off
+WASD - Drone Forward, Left, Right, Back
+Q/E - slow yaw
+Arrow keys - ascend, descend, or yaw
+H - toggle HUD
+Backspace - land
+P - palm-land
+Enter - take picture
+R - toggle recording
+C - toggle command queue on/off
+X - toggle forward / downward cam (Only on edu model drone)
+
 ## Credits
 Credit goes to the excellent work done by the following individuals/groups:
 - Hanyazou for many of the ideas in these modules: https://github.com/hanyazou/TelloPy
