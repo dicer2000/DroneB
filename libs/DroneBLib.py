@@ -2,6 +2,9 @@
 DroneBLib - Tello Drone Starter Library
 (c)2022. Brett Huffman
 v.02
+
+.01 Initial Beta code
+.02 Adds CommandQueue
 ---------------------------------------
 Drone Controls
 tab - lift off
@@ -34,7 +37,6 @@ import pygame.font
 import copy
 from threading import Event, Thread, Lock
 from collections import deque
-#Python library that allows you to create multiple threads to run multiple functions at the same time
 
 # Thread-safe global objects
 class SafeFrame(object):
@@ -117,7 +119,7 @@ class DroneB(object):
         self.tracking = False
         self.keydown = False
         self.date_fmt = '%Y-%m-%d_%H%M%S'
-        self.speed = 50
+        self.speed = 100
         self.drone = tellopy.Tello()
         self.wid = None
         self.show_hud = True
@@ -136,8 +138,9 @@ class DroneB(object):
         self.command_queue_active = True
 
     def init_drone(self):
+
+
         """Connect, uneable streaming and subscribe to events"""
-        
         # Check for errors -- often caused by not
         # having the drone connected.
         self.drone.connect()

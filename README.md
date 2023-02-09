@@ -1,9 +1,14 @@
 # DroneB
 #### ©2022. Brett Huffman
-#### v.02
+#### v.03
 ---------------------------------------
 
 The DroneB project is meant to act as a starting point for Tello Drone programming in the Intro to Programming course at Principia College.
+
+### Versions
+.01 - Initial release
+.02 - Several fixes and addition of QR Codes, Tracking
+.03 - Bug fixes
 
 ## Files Included
 There are several python files available for use:

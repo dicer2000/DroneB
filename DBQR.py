@@ -3,13 +3,14 @@ DBQR.py - reads qr codes and prints to the
 text to the screen
 
 (c)2022. Brett Huffman
-v.02
+v.03
 ---------------------------------------
 '''
 from libs.DroneBLib import DroneB
 from libs.DroneBLib import exiting, current_frame
 import cv2
 from libs.QR import read_qr_code
+from math import floor
 
 def main():
     db = DroneB()
@@ -35,11 +36,16 @@ def main():
             loop_count += 1
             if loop_count % 30 == 0:
                 # Look for QR - if read put text on screen
-                val = read_qr_code(image=image)
+                str_code, points = read_qr_code(image=image)
 
+                if(str_code and len(points) > 0):
+                    # Be sure to get the floor of these points
+                    start = floor(points[0][0][0]), floor(points[0][0][1])
+                    end = floor(points[0][2][0]), floor(points[0][2][1])
+                    # Draw text and surrounding box
+                    cv2.putText(image, str_code, (2, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+                    cv2.rectangle(image, start, end, (0, 255, 0), 3)
 
-                cv2.putText(image, val[0], (2, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-                cv2.rectangle(image, val[0][0], val[0][4], (0, 255, 0), 3)
                 # CV way of showing video
                 cv2.imshow('Secondary View', image)
                 _ = cv2.waitKey(1) & 0xFF
