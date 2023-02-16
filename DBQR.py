@@ -10,7 +10,6 @@ from libs.DroneBLib import DroneB
 from libs.DroneBLib import exiting, current_frame
 import cv2
 from libs.QR import read_qr_code
-from math import floor
 
 def main():
     db = DroneB()
@@ -40,8 +39,8 @@ def main():
 
                 if(str_code and len(points) > 0):
                     # Be sure to get the floor of these points
-                    start = floor(points[0][0][0]), floor(points[0][0][1])
-                    end = floor(points[0][2][0]), floor(points[0][2][1])
+                    start = (int(points[0][0][0]), int(points[0][0][1]))
+                    end = (int(points[0][2][0]), int(points[0][2][1]))
                     # Draw text and surrounding box
                     cv2.putText(image, str_code, (2, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
                     cv2.rectangle(image, start, end, (0, 255, 0), 3)

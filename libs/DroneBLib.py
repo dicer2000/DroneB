@@ -1,7 +1,7 @@
 '''
 DroneBLib - Tello Drone Starter Library
 (c)2022. Brett Huffman
-v.02
+v.03
 
 .01 Initial Beta code
 .02 Adds CommandQueue
@@ -119,7 +119,7 @@ class DroneB(object):
         self.tracking = False
         self.keydown = False
         self.date_fmt = '%Y-%m-%d_%H%M%S'
-        self.speed = 100
+        self.speed = 50
         self.drone = tellopy.Tello()
         self.wid = None
         self.show_hud = True
@@ -344,6 +344,10 @@ class DroneB(object):
                 self.hud[i][2] = fmt_str.format(val)
             i += 1
 
+    def set_speed(self, speed):
+        '''Set the speed of the drone 1-100'''
+        self.speed = speed
+
     ####################################
     # Functions Available for core functions
     def get_exiting(self):
@@ -402,6 +406,7 @@ class DroneB(object):
             'down': pygame.K_DOWN,
             'takeoff': pygame.K_TAB,
             'land': pygame.K_BACKSPACE,
+            'pause': pygame.K_1,
         }
 
     def process_command_queue(self):

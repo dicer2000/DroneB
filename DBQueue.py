@@ -4,7 +4,7 @@ the drone to process.  Press 'C' to start/stop
 processing items in the queue.
 
 (c)2022. Brett Huffman
-v.02
+v.03
 ---------------------------------------
 '''
 from libs.DroneBLib import DroneB, Queue_Item
@@ -14,14 +14,19 @@ import cv2
 def main():
     db = DroneB()
     db.start(custom_loop = True)
+    db.set_speed(50)
 
 
     # Fill command queue with items to process
     db.AddNewQueueItem("takeoff", 2000)
-    for i in range(12):
+    db.AddNewQueueItem("pause", 2000)
+    
+    for i in range(4):
         db.AddNewQueueItem("yaw_left", 500)
-        db.AddNewQueueItem("right", 500)
+        db.AddNewQueueItem("pause", 2000)
         db.AddNewQueueItem("forward", 300)
+        db.AddNewQueueItem("pause", 2000)
+
     db.AddNewQueueItem("land", 1000)
 
 

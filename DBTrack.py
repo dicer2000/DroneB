@@ -12,25 +12,13 @@ from libs.DroneBLib import exiting, current_frame
 import cv2
 import numpy as np
 import imutils
-
-ihighH = 180
-ilowH = 52
-ihighS = 200
-ilowS = 94
-ihighV = 130
-ilowV = 30
+from libs.QR import read_qr_code
+from math import floor
 
 def main():
 
-
     db = DroneB()
     db.start(custom_loop = True)
-    
-    # Set range for green color and 
-    # define mask
-    higher_hsv = np.array([180,255,130], np.uint8) #(131, 67, 18)  #BGR
-    lower_hsv = np.array([52,94,30], np.uint8) #(255, 255, 130) #BGR
-    kernel = np.ones((5, 5), "uint8")
 
     loop_count = 0
     # The start of this loop should be exactly as it's shown below. Any changes and it might not work
@@ -51,65 +39,23 @@ def main():
             loop_count += 1
             if loop_count % 5 == 0:
 
-                # Analyze video cv2 color detection
-#                hsvFrame = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-#                green_mask = cv2.inRange(hsvFrame, green_lower, green_upper)
-#                green_mask = cv2.dilate(green_mask, kernal)
-#                res_green = cv2.bitwise_and(image, image,
-#                                            mask = green_mask)
+                # Look for QR - if read put text on screen
+                str_code, points = read_qr_code(image=image)
 
-#                blurred = cv2.GaussianBlur(image, (11, 11), 0)
-
-                hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-                # Apply the cv2.inrange method to create a mask
-                mask = cv2.inRange(hsv, lower_hsv, higher_hsv)
-                # Apply the mask on the image to extract the original color
-                frame = cv2.bitwise_and(image, image, mask=mask)
-
-
-#                mask = cv2.erode(mask, None, iterations=2)
-#                mask = cv2.dilate(mask, None, iterations=2)
-
-#                res = cv2.bitwise_and(image, image, mask = mask)
-
-                # Convert to BGR Gray
-#                mask2 = cv2.cvtColor(hsv.copy(), cv2.COLOR_BGR2GRAY)
-
-                # reduce the noise
-                mask2 = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-                contours, _ = cv2.findContours(mask2, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-#                contours = imutils.grab_contours(contours)
-#                contours = contours[0]
-                # Get dimensions of everything
-#                x = 10000
-#                y = 10000
-#                w = 0
-#                y = 0
-
-#                for contour in contours:
-#                    x,y,w,h = cv2.boundingRect(contour)
-#                    if w>5 and h>10:
-#                    cv2.rectangle(image,(x,y),(x+w,y+h),(155,155,0),1)
-
-                extLeft = None
-                extRight = None
-                extTop = None
-                extBot = None
+                start = None
+                end = None
                 
-                if len(contours) > 0:
-                    c = max(contours, key=cv2.contourArea)
+                if(str_code and len(points) > 0):
+                    # Be sure to get the floor of these points
+                    start = (int(points[0][0][0]), int(points[0][0][1]))
+                    end = (int(points[0][2][0]), int(points[0][2][1]))
 
-                    extLeft = tuple(c[c[:, :, 0].argmin()][0])
-                    extRight = tuple(c[c[:, :, 0].argmax()][0])
-                    extTop = tuple(c[c[:, :, 1].argmin()][0])
-                    extBot = tuple(c[c[:, :, 1].argmax()][0])
-
-                    cv2.rectangle(frame, extTop, extBot, (0, 255, 0), 3)
+                    # Draw text and surrounding box
+                    cv2.putText(image, str_code, (2, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
+                    cv2.rectangle(image, start, end, (0, 255, 0), 3)
+                    
                 else:
                     continue
-
-#                cv2.putText(frame, str(ihighH), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
-#                cv2.putText(frame, str(ilowH), (100, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2, cv2.LINE_AA)
 
                 ''' Determine how much to move
                 The axes are shown below (assuming a frame width and height of 600x400):
@@ -119,7 +65,7 @@ def main():
 
                 -Y                 (0,-200)
                 -X                    X                    +X
-                '''
+                
                 if  abs(extBot[0] - extTop[0]) > 40 and abs(extBot[1] - extTop[1]) > 40:
                     # Get image midpoint and calculate diff
                     height, width, channels = frame.shape
@@ -127,8 +73,8 @@ def main():
                     obj_mid = (extTop[0] + (extBot[0] - extTop[0])//2, extTop[1] + (extBot[1] - extTop[1])//2)
 
                     # Draw them on the image
-                    cv2.circle(frame, image_mid, 4, (255, 255, 255))
-                    cv2.circle(frame, obj_mid, 4, (255, 0, 255))
+                    cv2.circle(image, image_mid, 4, (255, 255, 255))
+                    cv2.circle(image, obj_mid, 4, (255, 0, 255))
 
                     # Do a little proportion here
                     # 40 pixels   =   diff
@@ -150,9 +96,9 @@ def main():
                         elif prop_y_to_move < -5:
                             print("Sent down", abs(prop_x_to_move))
                             db.AddNewQueueItem("down", abs(prop_x_to_move))
-
+'''
                 # CV way of showing video
-                cv2.imshow('Secondary View', frame)
+                cv2.imshow('Secondary View', image)
                 _ = cv2.waitKey(1) & 0xFF
 
 
