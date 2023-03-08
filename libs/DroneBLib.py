@@ -5,6 +5,7 @@ v.03
 
 .01 Initial Beta code
 .02 Adds CommandQueue
+.03 Bug fixes; Added Pause as a possible command
 ---------------------------------------
 Drone Controls
 tab - lift off
@@ -55,19 +56,19 @@ class SafeFrame(object):
             return copy.deepcopy(self.value)
         finally:
             self.lock.release()
-class SafeExiting(object):
+class SafeBool(object):
     def __init__(self, startval = False):
         self.lock = Lock()
         self.value = startval
-    def set(self, exiting):
+    def set(self, val):
         with self.lock:
-            self.value = exiting
+            self.value = val
     def get(self):
         with self.lock:
             return self.value
 
 current_frame = SafeFrame()
-exiting = SafeExiting(False)
+exiting = SafeBool(False)
 
 class DroneB(object):
     """
@@ -125,6 +126,7 @@ class DroneB(object):
         self.show_hud = True
         self.video_format = 0 # 4 x 3 by default
         self.down_camera = 0 # Dont show downward camera
+        self.take_pic = False
         self.hud_font = None
         self.hud_color = (255,255,255)
         self.out_file = None
@@ -217,10 +219,10 @@ class DroneB(object):
             'v': self.toggle_video,
             'c': self.toggle_command_queue,
             'x': self.toggle_downcamera,
-    #        'r': toggle_recording,
+            'r': self.toggle_recording,
     #        'z': toggle_zoom,
-    #        'enter': take_picture,
-    #        'return': take_picture,
+            'enter': self.take_picture,
+            'return': self.take_picture,
         }
 
     def process_keyboard(self):
@@ -232,6 +234,7 @@ class DroneB(object):
                 if keyname == 'escape':
                     exiting.set(True)
                     self.drone.quit()
+                    pygame.quit()   # Added to shutdown properly
                     exit(0)
                 if keyname in self.controls:
                     key_handler = self.controls[keyname]
@@ -287,6 +290,14 @@ class DroneB(object):
 #        image = self.write_hud(image)
 #        if self.record:
 #            self.record_vid(frame)
+
+        # Save the image if in a photo
+        if self.take_pic:
+            # Save current_frame to a unique filename
+            filename = time.strftime("./pics/%Y%m%d-%H%M%S.png")
+            cv2.imwrite(filename, image)
+            self.take_pic = False
+
         return image
 
     def pretty_render(self, text, font, gfcolor=pygame.Color('dodgerblue'), ocolor=(255, 255, 255), opx=2):
@@ -357,18 +368,17 @@ class DroneB(object):
     def take_picture(self, drone, speed):
         if speed == 0:
             return
-        drone.take_picture()
+        self.take_pic = True
 
     def palm_land(self, drone, speed):
         if speed == 0:
             return
-        drone.palm_land()
+        self.drone.palm_land()
 
     def toggle_hud(self, drone, speed):
         if speed == 0:
             return
         self.show_hud = not self.show_hud
-
 
     def toggle_video(self, drone, speed):
         if speed == 0:
@@ -383,6 +393,11 @@ class DroneB(object):
         self.down_camera = 1 - self.down_camera
         cmd = 'downvision {}'.format(self.down_camera)
         self.drone.sock.sendto(bytes(cmd, 'utf-8'), self.drone.tello_addr)
+
+    def toggle_recording(self, drone, speed):
+        if speed == 0:
+            return
+        self.take_pic = True
 
     def toggle_command_queue(self, drone, speed):
         # Enable processing items off the queue
@@ -407,6 +422,9 @@ class DroneB(object):
             'takeoff': pygame.K_TAB,
             'land': pygame.K_BACKSPACE,
             'pause': pygame.K_1,
+            'record': pygame.K_r,
+            'return': pygame.K_RETURN,
+            'enter': pygame.K_KP_ENTER
         }
 
     def process_command_queue(self):

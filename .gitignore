@@ -2,5 +2,10 @@
 __pycache__/*
 old/*
 nn/*
+# Exclude any pics, but keep the folder like this:
+pics/*
+# Exception file
+!pics/.gitkeep
 
 DBThreading.py
+DBAT.py
