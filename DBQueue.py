@@ -18,13 +18,13 @@ def main():
 
 
     # Fill command queue with items to process
-#    db.AddNewQueueItem("takeoff", 2000)
+    db.AddNewQueueItem("takeoff", 2000)
 #    db.AddNewQueueItem("pause", 2000)
     
 #    for i in range(4):
-    db.AddNewQueueItem("forward", 12000)
+    db.AddNewQueueItem("forward", 2500)
     db.AddNewQueueItem("pause", 2000)
-    db.AddNewQueueItem("yaw_left", 500)
+    db.AddNewQueueItem("enter", 500)
 
 #    db.AddNewQueueItem("land", 1000)
 
